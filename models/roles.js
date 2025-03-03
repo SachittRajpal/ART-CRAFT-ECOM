@@ -1,15 +1,15 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
-const Roles = sequelize.define('Role', { // Changed the model name to 'Role' for consistency
+const Roles = sequelize.define('Role', { 
   roleid: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true, // Ensures auto increment functionality
+    autoIncrement: true,
   },
   roleName: {
     type: DataTypes.STRING,
-    allowNull: false, // Ensures the roleName is required
+    allowNull: false, 
   },
 });
 
