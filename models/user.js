@@ -3,14 +3,15 @@ const sequelize = require('../configs/database');
 
 const User = sequelize.define('User', {
     userid: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,   // ✅ Use UUID instead of STRING
+        defaultValue: DataTypes.UUIDV4, // ✅ Auto-generate UUID
         primaryKey: true
     },
-    password: {
+    username: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    username: {
+    password: {
         type: DataTypes.STRING,
         allowNull: false
     },
