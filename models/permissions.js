@@ -12,7 +12,7 @@ const Permissions = sequelize.define('Permissions', {
     allowNull: false
   }
 }, {
-  timestamps: false,  //  If you don't want timestamps like createdAt and updatedAt
+  timestamps: false, 
 });
 
 
