@@ -20,14 +20,14 @@ const Customer = sequelize.define("Customer", {
     allowNull: false,
   },
   dob: {
-    type: DataTypes.DATE, // Ensuring proper date type
+    type: DataTypes.DATE,
     allowNull: false,
   },
   stateid: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  countryid: { // Consistent naming
+  countryid: { 
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -48,11 +48,11 @@ const Customer = sequelize.define("Customer", {
     allowNull: true,
   },
 }, {
-  tableName: 'customers', // Explicit table name
-  timestamps: false, // Optional: if you don't want timestamps
+  tableName: 'customers', 
+  timestamps: false,
 });
 
-// Add associations (if needed)
+
 Customer.associate = (models) => {
   // Example: customer belongs to state, country, region, and user
   Customer.belongsTo(models.State, { foreignKey: 'stateid' });
