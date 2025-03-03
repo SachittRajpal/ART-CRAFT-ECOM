@@ -3,7 +3,7 @@ const sequelize = require('../configs/database');
 
 const User = sequelize.define('User', {
     userid: {
-        type: DataTypes.UUID,   // ✅ Use UUID instead of STRING
+        type: DataTypes.UUID,   //  Use UUID instead of STRING
         defaultValue: DataTypes.UUIDV4, // ✅ Auto-generate UUID
         primaryKey: true
     },
