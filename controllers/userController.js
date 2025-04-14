@@ -1,48 +1,75 @@
-const User = require('../models/user');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const asyncHandler = require('express-async-handler');
+const db = require('../models');
 
-exports.registerUser = async (req, res) => {
-    try {
-        const { userid, password, username, emailid, phoneno, dob, roleid } = req.body;
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private/Admin
+const getUsers = asyncHandler(async (req, res) => {
+    const users = await db.User.findAll({
+        attributes: { exclude: ['password'] }
+    });
+    res.json(users);
+});
 
-        // Hash password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+const deleteUser = asyncHandler(async (req, res) => {
+    const user = await db.User.findByPk(req.params.id);
 
-        const newUser = await User.create({
-            userid,
-            password: hashedPassword,
-            username,
-            emailid,
-            phoneno,
-            dob,
-            roleid
+    if (user) {
+        await user.destroy();
+        res.json({ message: 'User removed' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private/Admin
+const getUserById = asyncHandler(async (req, res) => {
+    const user = await db.User.findByPk(req.params.id, {
+        attributes: { exclude: ['password'] }
+    });
+
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private/Admin
+const updateUser = asyncHandler(async (req, res) => {
+    const user = await db.User.findByPk(req.params.id);
+
+    if (user) {
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+        user.isAdmin = req.body.isAdmin || user.isAdmin;
+
+        const updatedUser = await user.save();
+
+        res.json({
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            isAdmin: updatedUser.isAdmin
         });
-
-        res.status(201).json({ message: "User registered successfully", user: newUser });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
     }
-};
+});
 
-exports.loginUser = async (req, res) => {
-    try {
-        const { emailid, password } = req.body;  // Use emailid for login
-        const user = await User.findOne({ where: { emailid } });  // Find user by emailid
-
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-
-        const token = jwt.sign({ userid: user.userid, roleid: user.roleid }, "your_secret_key", { expiresIn: "1h" });
-
-        res.json({ message: "Login successful", token });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+module.exports = {
+    getUsers,
+    deleteUser,
+    getUserById,
+    updateUser
 };

@@ -1,38 +1,65 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../configs/database');
+const bcrypt = require('bcryptjs');
 
-const User = sequelize.define('User', {
-    userid: {
-        type: DataTypes.UUID,   //  Use UUID instead of STRING
-        defaultValue: DataTypes.UUIDV4, //  Auto-generate UUID
-        primaryKey: true
-    },
-    username: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    emailid: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    phoneno: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    dob: {
-        type: DataTypes.DATEONLY,
-        allowNull: false
-    },
-    roleid: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    }
-}, {
-    timestamps: false
-});
+module.exports = (sequelize, DataTypes) => {
+    const User = sequelize.define('User', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        name: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        email: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            unique: true,
+            validate: {
+                isEmail: true,
+                notEmpty: true
+            }
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true,
+                len: [6, 100]
+            }
+        },
+        isAdmin: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        }
+    }, {
+        timestamps: true,
+        underscored: true,
+        tableName: 'users',
+        hooks: {
+            beforeSave: async (user) => {
+                if (user.changed('password')) {
+                    const salt = await bcrypt.genSalt(10);
+                    user.password = await bcrypt.hash(user.password, salt);
+                }
+            }
+        }
+    });
 
-module.exports = User;
+    User.prototype.comparePassword = async function (enteredPassword) {
+        return await bcrypt.compare(enteredPassword, this.password);
+    };
+
+    User.associate = (models) => {
+        User.hasMany(models.Order, {
+            foreignKey: 'userId',
+            as: 'orders'
+        });
+    };
+
+    return User;
+};
