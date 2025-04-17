@@ -1,7 +1,8 @@
 const { Sequelize } = require('sequelize');
 const config = require('./config');
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.ENV || 'development';
+
 const dbConfig = config[env];
 
 const sequelize = new Sequelize({
@@ -9,6 +10,7 @@ const sequelize = new Sequelize({
   username: dbConfig.username,
   password: dbConfig.password,
   host: dbConfig.host,
+  port: dbConfig.port,
   dialect: dbConfig.dialect, // Explicitly specify the dialect
   logging: false,
   pool: {
